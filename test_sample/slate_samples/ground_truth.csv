@@ -1,0 +1,14 @@
+file,problems,written_answers,notes
+s01_clear_correct.jpg,"[""52-27"", ""34+18"", ""6+3""]","[""25"", ""52"", ""9""]","SYNTHETIC. clear, all correct"
+s02_borrow_error.jpg,"[""52-27"", ""34+18"", ""6+3""]","[""35"", ""52"", ""9""]",SYNTHETIC. 52-27 written as 35 (smaller-from-larger bug)
+s03_added_instead.jpg,"[""85-39"", ""47+25"", ""9-4""]","[""124"", ""72"", ""5""]",SYNTHETIC. 85-39 written as 124 (added instead of subtracted)
+s04_low_light.jpg,"[""52-27"", ""34+18"", ""6+3""]","[""25"", ""52"", ""9""]",SYNTHETIC. dim classroom light
+s05_tilted.jpg,"[""85-39"", ""47+25"", ""9-4""]","[""46"", ""72"", ""5""]",SYNTHETIC. phone held at an angle
+s06_smudged_answer.jpg,"[""73-48"", ""26+35"", ""8+7""]","[null, ""61"", ""15""]",SYNTHETIC. first answer rubbed out -> unreadable (truth: null)
+s07_small_writing.jpg,"[""52-27"", ""34+18"", ""6+3""]","[""25"", ""52"", ""9""]",SYNTHETIC. small handwriting
+s08_glare.jpg,"[""85-39"", ""47+25"", ""9-4""]","[""46"", ""72"", ""5""]",SYNTHETIC. window glare on the right side
+s09_notebook_pen.jpg,"[""73-48"", ""26+35"", ""8+7""]","[""25"", ""61"", ""15""]",SYNTHETIC. blue pen on ruled notebook paper
+s10_blank_answer.jpg,"[""52-27"", ""34+18"", ""6+3""]","[""25"", null, ""9""]",SYNTHETIC. child left the second answer blank (truth: null)
+s11_messy_hand.jpg,"[""85-39"", ""47+25"", ""9-4""]","[""46"", ""72"", ""5""]",SYNTHETIC. very uneven handwriting
+s12_forgot_carry.jpg,"[""73-48"", ""26+35"", ""8+7""]","[""25"", ""51"", ""15""]",SYNTHETIC. 26+35 written as 51 (forgot to carry)
+s13_noisy_photo.jpg,"[""52-27"", ""34+18"", ""6+3""]","[""25"", ""52"", ""9""]",SYNTHETIC. grainy low-quality phone camera
