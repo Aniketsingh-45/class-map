@@ -48,5 +48,4 @@ node_modules/
 .agents/
 skills-lock.json
 
-test_sample
-
+/test_sample
