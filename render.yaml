@@ -11,5 +11,11 @@ services:
         value: "1"
       - key: DEMO_PIN
         value: "1234"
+      - key: AUTO_SEED
+        value: "1"
       - key: SECRET_KEY
         generateValue: true
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: SARVAM_API_KEY
+        sync: false
