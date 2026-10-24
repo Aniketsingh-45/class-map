@@ -1,0 +1,11 @@
+[
+  {"id": "R-L1", "subject": "reading", "level": "letter", "skill": "letter sounds", "minutes": 8, "mode": "teacher-led", "materials": ["paper letter cards", "bag"], "status": "DRAFT - teacher review needed"},
+  {"id": "R-L2", "subject": "reading", "level": "letter", "skill": "match sound to letter", "minutes": 8, "mode": "pairs-independent", "materials": ["paper cards", "pebbles"], "status": "DRAFT"},
+  {"id": "R-W1", "subject": "reading", "level": "word", "skill": "build words", "minutes": 8, "mode": "teacher-led", "materials": ["letter cards"], "status": "DRAFT"},
+  {"id": "R-W2", "subject": "reading", "level": "word", "skill": "read word list", "minutes": 8, "mode": "independent", "materials": ["words written on board"], "status": "DRAFT"},
+  {"id": "R-P1", "subject": "reading", "level": "paragraph", "skill": "echo reading", "minutes": 8, "mode": "teacher-led", "materials": ["5 sentences on board"], "status": "DRAFT"},
+  {"id": "R-S1", "subject": "reading", "level": "story", "skill": "retell in pairs", "minutes": 8, "mode": "pairs-independent", "materials": [], "status": "DRAFT"},
+  {"id": "M-N1", "subject": "maths", "level": "1-digit numbers", "skill": "number line jump", "minutes": 8, "mode": "independent", "materials": ["chalk line", "bottle caps"], "status": "DRAFT"},
+  {"id": "M-S1", "subject": "maths", "level": "2-digit", "skill": "tens and ones bundles", "minutes": 8, "mode": "teacher-led", "materials": ["sticks", "rubber bands"], "status": "DRAFT"},
+  {"id": "M-B1", "subject": "maths", "level": "subtraction", "skill": "borrowing with bundles", "minutes": 8, "mode": "teacher-led", "materials": ["sticks", "rubber bands"], "status": "DRAFT"}
+]

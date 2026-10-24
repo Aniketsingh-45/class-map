@@ -1,0 +1,6 @@
+[
+  {"id": "L1", "level": "letter", "text": "क म ब स ग", "sec": 10, "reviewed_by": "TODO teacher"},
+  {"id": "W1", "level": "word", "text": "घर जल कमल आम पल बस नल फल सब कल", "sec": 15, "reviewed_by": "TODO teacher"},
+  {"id": "P1", "level": "paragraph", "text": "राम बाज़ार जाता है। वह आम खरीदता है। आम मीठा है। राम घर आता है।", "sec": 20, "reviewed_by": "TODO teacher"},
+  {"id": "S1", "level": "story", "text": "सीता के पास एक छोटी बकरी है। वह रोज़ सुबह घास खाती है। शाम को सीता उसे पानी पिलाती है। बकरी बहुत खुश रहती है।", "sec": 28, "reviewed_by": "TODO teacher"}
+]

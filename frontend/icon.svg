@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E65100"/>
+      <stop offset="100%" stop-color="#BF360C"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#grad)"/>
+  <!-- Open Book & Map Grid Symbol -->
+  <path d="M128 352c38-16 80-24 128-24 48 0 90 8 128 24V176c-38-16-80-24-128-24s-90 8-128 24v176z" fill="#FFF3E0" opacity="0.95"/>
+  <path d="M256 160v168" stroke="#E65100" stroke-width="8" stroke-linecap="round"/>
+  <!-- Sound wave symbol -->
+  <circle cx="256" cy="110" r="16" fill="#FFF"/>
+  <path d="M220 110a36 36 0 0 1 72 0" fill="none" stroke="#FFF" stroke-width="6" stroke-linecap="round"/>
+  <path d="M198 110a58 58 0 0 1 116 0" fill="none" stroke="#FFF" stroke-width="6" stroke-linecap="round"/>
+  <!-- Devanagari 'क' stylized -->
+  <text x="256" y="275" font-family="'Noto Sans Devanagari', sans-serif" font-size="90" font-weight="bold" fill="#BF360C" text-anchor="middle">क</text>
+  <!-- Level checkmark -->
+  <circle cx="360" cy="350" r="32" fill="#2E7D32"/>
+  <path d="M346 350l10 10 18-18" fill="none" stroke="#FFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

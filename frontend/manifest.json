@@ -1,0 +1,16 @@
+{
+  "name": "Class Map (कक्षा मानचित्र)",
+  "short_name": "ClassMap",
+  "description": "FLN Reading & Maths Assessment PWA for Primary Teachers",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FBF8F5",
+  "theme_color": "#D9531E",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

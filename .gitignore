@@ -1,0 +1,50 @@
+# Environment variables & Secrets (NEVER COMMIT!)
+.env
+.env.*
+*.env
+!.env.example
+*.pem
+*.key
+
+# Local SQLite databases
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Temporary media & upload files
+data/uploads/audio_*
+data/uploads/photo_*
+eval/audio/
+eval/photos/
+*.webm
+*.wav
+*.mp3
+*.m4a
+!data/uploads/demo_reading.webm
+!data/uploads/demo_slate.jpg
+
+# Logs and usage counters
+usage_log.jsonl
+*.log
+
+# Editor & OS files
+.DS_Store
+Thumbs.db
+node_modules/
+.vscode/
+.agents/
+skills-lock.json
+

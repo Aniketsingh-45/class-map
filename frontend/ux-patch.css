@@ -1,0 +1,45 @@
+/* Class Map UX patch: mobile-first fixes. Loaded after styles.css. */
+.cm-stale { background:#fff7ed; color:#9a3412; border-bottom:1px solid #fdba74; padding:8px 14px; font-size:.85rem; font-weight:600; text-align:center; }
+.cm-stale.hidden { display:none; }
+
+@media (max-width: 640px) {
+  /* 1. Evaluator bar: one scrollable row instead of three wrapped rows */
+  .evaluator-banner { flex-wrap:nowrap; overflow-x:auto; padding:6px 10px; gap:8px; -webkit-overflow-scrolling:touch; }
+  .evaluator-banner > div:first-child { display:none; }
+  .evaluator-actions { flex-wrap:nowrap; gap:6px; }
+  .evaluator-btn { white-space:nowrap; font-size:.74rem; padding:7px 11px; }
+
+  /* 2. Header: compact, no longer sticky (it used about 40% of the screen) */
+  .top-header { position:static; }
+  .nav-container { padding:8px 12px; gap:8px; flex-wrap:wrap; }
+  .logo-icon { width:34px; height:34px; }
+  .logo-text h1 { font-size:1.05rem; white-space:nowrap; }
+  .logo-text h1 span, #app-tagline { display:none; }
+  .budget-widget { display:none; }
+  .nav-meta { gap:6px; flex-wrap:wrap; width:100%; justify-content:space-between; }
+
+  /* 3. Bottom navigation bar for the main teacher actions */
+  body { padding-bottom:78px; }
+  .app-tabs { position:fixed; left:0; right:0; bottom:0; z-index:90; border-bottom:0; border-top:1px solid var(--border);
+              box-shadow:0 -4px 16px rgba(0,0,0,.08); padding-bottom:env(safe-area-inset-bottom); }
+  .tabs-container { display:flex; }
+  .tab-btn { flex:0 0 auto; flex-direction:column; justify-content:center; gap:2px; min-width:78px; max-width:92px; min-height:58px;
+             padding:6px 4px; font-size:.68rem; line-height:1.15; white-space:normal; text-align:center;
+             border-bottom:0; border-top:3px solid transparent; }
+  .tab-btn > span:first-child { font-size:1.3rem; }
+  .tab-btn.active { border-top-color:var(--primary,#d9531e); }
+
+  /* toast must not hide behind the bottom bar */
+  .classmap-toast { bottom:88px !important; left:12px !important; right:12px !important; text-align:center; }
+
+  /* 4. Bigger touch targets */
+  .btn, button.btn, select, input[type=text], input[type=password], input[type=number] { min-height:44px; }
+  .btn-sm { min-height:40px; }
+
+  /* 5. Tables become readable cards (labels are added by ux-patch.js) */
+  table.cm-stack, table.cm-stack tbody, table.cm-stack tr, table.cm-stack td { display:block; width:100%; }
+  table.cm-stack thead { display:none; }
+  table.cm-stack tr { border:1px solid var(--border,#e5e7eb); border-radius:12px; margin:0 0 10px; padding:6px 4px; background:#fff; }
+  table.cm-stack td { display:flex !important; justify-content:space-between; gap:12px; padding:6px 10px !important; border:0 !important; text-align:right; }
+  table.cm-stack td::before { content:attr(data-label); font-weight:600; color:var(--text-muted,#6b7280); text-align:left; flex:0 0 42%; }
+}

@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: class-map
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: STT_PROVIDER
+        value: sarvam
+      - key: USE_CLAUDE
+        value: "1"
+      - key: DEMO_PIN
+        value: "1234"
+      - key: SECRET_KEY
+        generateValue: true

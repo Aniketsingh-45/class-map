@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Class Map - Fast FLN Reading & Math Assessment</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#D9531E">
+  <link rel="icon" type="image/svg+xml" href="/icon.svg">
+  
+  <!-- Google Fonts: Inter & Noto Sans Devanagari -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/ux-patch.css">
+</head>
+<body>
+
+  <!-- Top Evaluator Fast Switch Bar -->
+  <div class="evaluator-banner">
+    <div>
+      <span style="font-weight:700;" data-i18n="eval_title">🏆 Evaluator Quick Controls:</span>
+      <span style="opacity:0.85;" data-i18n="eval_sub">1-Tap Role Demo</span>
+    </div>
+    <div class="evaluator-actions">
+      <button class="evaluator-btn active" onclick="quickLogin('teacher.demo','1234')">🧑‍🏫 Teacher</button>
+      <button class="evaluator-btn" onclick="openStudentLoginModal()">🎒 Student (prototype)</button>
+      <button class="evaluator-btn" onclick="quickLogin('head.demo','1234')">🏫 Headteacher</button>
+      <button class="evaluator-btn" onclick="quickLogin('officer.demo','1234')">🏛️ Block Officer</button>
+      <button id="toggle-sim-offline-btn" class="evaluator-btn" style="background:#b91c1c;" onclick="toggleSimulatedOffline()">✈️ Simulate offline</button>
+      <button class="evaluator-btn" style="background:#0284c7; font-weight:800; border:1px solid #7dd3fc;" onclick="openJudgeCheatSheetModal()">💡 Key Innovations for Judges</button>
+    </div>
+  </div>
+
+  <!-- Main Top Header -->
+  <header class="top-header">
+    <div class="nav-container">
+      <div class="logo-area" onclick="handleLogoClick()">
+        <img src="/icon.svg" alt="Class Map Logo" class="logo-icon">
+        <div class="logo-text">
+          <h1>Class Map <span style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">(कक्षा मानचित्र)</span></h1>
+          <p id="app-tagline" data-i18n="app_tagline">30s Accurate Level, Adaptive Groups & 20-min Multi-Grade Plan</p>
+        </div>
+      </div>
+      
+      <div class="nav-meta">
+        <!-- Live Offline / Queue Badge -->
+        <div id="net-status-badge" class="status-pill status-online">
+          <span class="status-dot"></span>
+          <span id="net-status-text" data-i18n="online">Online</span>
+        </div>
+
+        <!-- Claude Token Budget Guardrail Widget -->
+        <div class="budget-widget" title="Claude Token Spending Guardrail (Live daily tracking)">
+          <span>🤖 <span data-i18n="ai_budget">AI Budget</span>:</span>
+          <div class="budget-bar"><div id="budget-fill" class="budget-fill"></div></div>
+          <span id="budget-text" style="font-weight:700;" data-i18n="safe">Safe</span>
+        </div>
+
+        <!-- Language Switcher Toggle -->
+        <button id="lang-btn" class="lang-toggle-btn" onclick="toggleLanguage()" title="Switch Language / भाषा बदलें">
+          🌐 <strong>English</strong> | हिन्दी
+        </button>
+
+        <!-- User / Logout -->
+        <div id="user-pill" style="display:none; align-items:center; gap:8px;">
+          <span id="user-display" style="font-size:0.82rem; font-weight:700; color:var(--secondary);">teacher.demo</span>
+          <button class="btn btn-outline btn-sm" onclick="logout()" title="Logout" data-i18n="logout">🚪 Logout</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Offline Warning Banner -->
+  <div id="offline-banner" class="offline-banner hidden">
+    <span id="offline-banner-text">⚠️ No internet connection. Recordings are saved on this phone and upload when internet returns.</span>
+    <button class="btn btn-sm btn-outline" style="border-color:#fdba74;" onclick="flushOfflineQueue()" data-i18n="sync_now">Sync Now</button>
+  </div>
+
+  <!-- Navigation Tabs (Teacher / Staff) -->
+  <nav id="app-tabs-nav" class="app-tabs" style="display:none;">
+    <div class="tabs-container">
+      <button class="tab-btn active" data-tab="my-class" onclick="switchTab('my-class')">
+        <span>📋</span> <span data-i18n="tab_class">My Class</span>
+      </button>
+      <button class="tab-btn" data-tab="reading" onclick="switchTab('reading')">
+        <span>🎙️</span> <span data-i18n="tab_reading">Reading Assessment</span>
+      </button>
+      <button class="tab-btn" data-tab="manual" onclick="switchTab('manual')">
+        <span>✍️</span> <span data-i18n="tab_manual">Offline Manual Level</span>
+      </button>
+      <button class="tab-btn" data-tab="maths" onclick="switchTab('maths')">
+        <span>📐</span> <span data-i18n="tab_maths">Maths Slate</span>
+      </button>
+      <button class="tab-btn" data-tab="homework-review" onclick="switchTab('homework-review')">
+        <span>📝</span> <span data-i18n="tab_homework_review">Homework Review</span>
+        <span id="hw-pending-badge" class="tab-badge" style="display:none;">0</span>
+      </button>
+      <button class="tab-btn" data-tab="groups" onclick="switchTab('groups')">
+        <span>👥</span> <span data-i18n="tab_groups">Class Groups</span>
+      </button>
+      <button class="tab-btn" data-tab="plan" onclick="switchTab('plan')">
+        <span>⏱️</span> <span data-i18n="tab_plan">20-Min Plan</span>
+      </button>
+      <button class="tab-btn" data-tab="progress" onclick="switchTab('progress')">
+        <span>📈</span> <span data-i18n="tab_progress">Progress</span>
+      </button>
+      <button class="tab-btn" data-tab="samples" onclick="switchTab('samples')" style="color:var(--primary); font-weight:700;">
+        <span>⭐</span> <span data-i18n="tab_samples">Evaluator S1-S5</span>
+      </button>
+      <button id="summary-tab-btn" class="tab-btn" data-tab="summary" onclick="switchTab('summary')" style="display:none;">
+        <span>🏫</span> <span data-i18n="tab_summary">School Summary</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="main-content">
+
+    <!-- 1. LOGIN VIEW -->
+    <section id="view-login" class="view-section active">
+      <div style="max-width: 480px; margin: 30px auto;">
+        <div class="card" style="padding: 28px;">
+          <div style="text-align: center; margin-bottom: 22px;">
+            <img src="/icon.svg" style="width: 60px; height: 60px; border-radius: var(--radius-md);" alt="App">
+            <h2 style="font-size: 1.5rem; font-weight: 800; margin-top: 10px; color: var(--secondary);" data-i18n="login_title">Class Map Login</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted);" data-i18n="login_subtitle">Foundational Literacy & Numeracy Assessment Platform</p>
+          </div>
+
+          <!-- Dual Login Tabs: Teacher vs Student -->
+          <div style="display: flex; border-bottom: 2px solid var(--border); margin-bottom: 20px;">
+            <button id="login-tab-teacher" class="tab-btn active" style="flex:1; justify-content:center; padding:10px 0;" onclick="toggleLoginRoleTab('teacher')">
+              🧑‍🏫 <span data-i18n="teacher_staff">Teacher / Staff</span>
+            </button>
+            <button id="login-tab-student" class="tab-btn" style="flex:1; justify-content:center; padding:10px 0;" onclick="toggleLoginRoleTab('student')">
+              🎒 <span data-i18n="student_home">Student (Home)</span>
+            </button>
+          </div>
+
+          <!-- Form A: Teacher / Staff Login -->
+          <form id="form-teacher-login" onsubmit="handleLoginSubmit(event)">
+            <div class="form-group">
+              <label class="form-label" for="login-username" data-i18n="username">Username</label>
+              <input type="text" id="login-username" class="form-control" value="teacher.demo" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="login-pin" data-i18n="pin">PIN</label>
+              <input type="password" id="login-pin" class="form-control" value="1234" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 10px;" data-i18n="login_btn">Login as Teacher</button>
+          </form>
+
+          <!-- Form B: Student Homework Login -->
+          <form id="form-student-login" style="display: none;" onsubmit="handleStudentLoginSubmit(event)">
+            <div class="form-group">
+              <label class="form-label" for="student-school-select" data-i18n="school_label">School</label>
+              <select id="student-school-select" class="form-control">
+                <option value="1">Demo Primary School (GPS Rampur)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="student-label-input" data-i18n="student_id_label">Child Name or Roll Number</label>
+              <input type="text" id="student-label-input" class="form-control" placeholder="e.g. R01, Aman, or Priya" value="R01" required>
+              <small style="color:var(--text-muted); font-size:0.75rem;" data-i18n="student_login_hint">
+                💡 First name or short roll number. New students logging in from home will be auto-registered under the teacher!
+              </small>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 10px; background:#0284c7;" data-i18n="student_login_btn">
+              🎒 Open Student Homework Portal
+            </button>
+          </form>
+
+          <div style="margin-top: 24px; padding-top: 18px; border-top: 1px dashed var(--border); font-size: 0.82rem; color: var(--text-muted); text-align: center;">
+            <p><strong data-i18n="demo_accounts">Quick Demo Credentials (PIN: 1234):</strong></p>
+            <div style="display: flex; justify-content: center; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+              <span class="badge" style="background:#f1f5f9; padding:4px 8px; border-radius:4px; cursor:pointer;" onclick="quickLogin('teacher.demo','1234')">teacher.demo</span>
+              <span class="badge" style="background:#f1f5f9; padding:4px 8px; border-radius:4px; cursor:pointer;" onclick="quickStudentLogin('R01')">Student R01</span>
+              <span class="badge" style="background:#f1f5f9; padding:4px 8px; border-radius:4px; cursor:pointer;" onclick="quickLogin('head.demo','1234')">head.demo</span>
+              <span class="badge" style="background:#f1f5f9; padding:4px 8px; border-radius:4px; cursor:pointer;" onclick="quickLogin('officer.demo','1234')">officer.demo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. STUDENT HOMEWORK PORTAL VIEW -->
+    <section id="view-student-portal" class="view-section">
+      <div class="student-hero">
+        <div>
+          <h2>👋 <span data-i18n="welcome_student">Welcome</span>, <span id="st-dash-name">Student</span>!</h2>
+          <p data-i18n="student_portal_subtitle">Complete today's reading and maths homework from home. Your teacher will review your submission tomorrow!</p>
+          <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+            <button class="btn btn-sm btn-outline" style="border-color:#94a3b8; color:#fff;" onclick="openStudentLoginModal()">🔄 Switch Child / दूसरा बच्चा चुनें</button>
+            <button class="btn btn-sm btn-primary" onclick="quickLogin('teacher.demo','1234')">🧑‍🏫 Back to Teacher / शिक्षक दृश्य</button>
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 0.78rem; text-transform: uppercase; color: #cbd5e1; font-weight:700;" data-i18n="current_fln_level">Current FLN Level</div>
+          <span id="st-dash-level-badge" class="lvl-badge lvl-paragraph" style="font-size:0.95rem; padding:6px 14px; margin-top:4px;">Paragraph</span>
+        </div>
+      </div>
+
+      <!-- Homework Cards Grid -->
+      <div class="hw-grid">
+        <!-- Card 1: Assigned Reading Practice -->
+        <div class="hw-card">
+          <div>
+            <div class="hw-badge-step">
+              <span>🎙️</span> <span data-i18n="task_1_reading">Task 1: Reading Homework</span>
+            </div>
+            <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--secondary);" id="st-hw-task-title">Paragraph Reading Practice</h3>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px;" id="st-hw-instruction">
+              Read the Hindi passage aloud clearly into the microphone.
+            </p>
+
+            <div class="passage-display" style="margin-bottom: 16px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span id="st-passage-tag" class="lvl-badge lvl-paragraph">Paragraph (P1)</span>
+                <span style="font-size:0.75rem; color:var(--text-muted);">⏱️ ~20s</span>
+              </div>
+              <div id="st-passage-text" class="passage-text" style="font-size:1.15rem; min-height:80px;">
+                राम बाज़ार जाता है। वह आम खरीदता है। आम मीठा है। राम घर आता है।
+              </div>
+            </div>
+
+            <!-- Student Audio Recorder -->
+            <div class="recorder-box" style="padding: 16px;">
+              <div class="mic-btn-container">
+                <button id="st-mic-btn" class="mic-btn" onclick="toggleStudentRecording()" title="Start / Stop Recording">
+                  🎙️
+                </button>
+              </div>
+              <div id="st-record-timer" class="rec-timer">00:00</div>
+              <div id="st-record-status" class="rec-helper" data-i18n="tap_mic_read">Tap the big mic and read the passage aloud (max 30s)</div>
+              <audio id="st-audio-playback" controls style="display:none;"></audio>
+            </div>
+          </div>
+
+          <div style="margin-top: 14px;">
+            <button id="st-btn-submit-reading" class="btn btn-primary btn-lg" style="width:100%;" onclick="submitStudentReadingHomework()" disabled>
+              ⚡ <span data-i18n="submit_reading_hw">Submit Reading Homework</span>
+            </button>
+            <div class="privacy-notice" style="margin-top:10px;">
+              <span>🔒</span>
+              <span data-i18n="dpdp_reading_notice"><strong>Privacy:</strong> Audio is transcribed, scored, and discarded immediately. No voice is stored.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Assigned Maths Practice -->
+        <div class="hw-card">
+          <div>
+            <div class="hw-badge-step" style="background:#e0f2fe; color:#0369a1;">
+              <span>📐</span> <span data-i18n="task_2_maths">Task 2: Maths Slate Homework</span>
+            </div>
+            <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--secondary);" data-i18n="maths_slate_title">Slate / Notebook Exercise</h3>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px;" data-i18n="maths_slate_instruction">
+              Solve these 3 questions in your notebook or slate, then take a clear photo.
+            </p>
+
+            <!-- Math Questions Container -->
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:var(--radius-md); padding:16px; margin-bottom:16px;">
+              <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-bottom:8px;" data-i18n="todays_questions">Today's Questions:</div>
+              <div id="st-math-problems-list" style="display:flex; gap:10px; flex-wrap:wrap;">
+                <span class="badge" style="background:#fff; border:1px solid var(--border); font-size:1.1rem; padding:6px 14px; font-weight:800;">24 + 15 = ?</span>
+                <span class="badge" style="background:#fff; border:1px solid var(--border); font-size:1.1rem; padding:6px 14px; font-weight:800;">48 - 19 = ?</span>
+                <span class="badge" style="background:#fff; border:1px solid var(--border); font-size:1.1rem; padding:6px 14px; font-weight:800;">7 + 5 = ?</span>
+              </div>
+            </div>
+
+            <!-- Photo Upload Area -->
+            <div class="form-group">
+              <label class="form-label" for="st-math-photo" data-i18n="upload_slate_photo">Snap / Upload Slate Photo:</label>
+              <input type="file" id="st-math-photo" class="form-control" accept="image/*" onchange="previewStudentSlatePhoto(event)">
+            </div>
+
+            <div id="st-slate-preview-box" style="display:none; text-align:center; margin:10px 0;">
+              <img id="st-slate-preview-img" style="max-height:180px; border-radius:var(--radius-sm); border:2px solid var(--border);" alt="Preview">
+            </div>
+          </div>
+
+          <div style="margin-top: 14px;">
+            <button id="st-btn-submit-maths" class="btn btn-primary btn-lg" style="width:100%; background:#0284c7;" onclick="submitStudentMathsHomework()" disabled>
+              📐 <span data-i18n="submit_maths_hw">Submit Maths Homework</span>
+            </button>
+            <div class="privacy-notice" style="margin-top:10px;">
+              <span>🔒</span>
+              <span data-i18n="dpdp_maths_notice"><strong>Privacy:</strong> Slate photo is analyzed for handwriting digits and deleted immediately.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Recent Homework Submissions -->
+      <div class="card">
+        <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--secondary); margin-bottom: 12px;" data-i18n="my_submissions">My Recent Homework Submissions</h3>
+        <div style="overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse; font-size:0.88rem;">
+            <thead>
+              <tr style="border-bottom:2px solid var(--border); text-align:left;">
+                <th style="padding:10px;" data-i18n="subject">Subject</th>
+                <th style="padding:10px;" data-i18n="task">Task</th>
+                <th style="padding:10px;" data-i18n="date">Date</th>
+                <th style="padding:10px;" data-i18n="score">AI Score</th>
+                <th style="padding:10px;" data-i18n="status">Review Status</th>
+              </tr>
+            </thead>
+            <tbody id="st-submissions-table-body">
+              <tr>
+                <td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);" data-i18n="no_submissions">
+                  No submissions yet today. Record your reading or upload a maths photo above!
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. TEACHER HOMEWORK REVIEW VIEW -->
+    <section id="view-homework-review" class="view-section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" data-i18n="hw_review_title">Student Homework Submissions (Review Queue)</h2>
+          <p class="section-subtitle" data-i18n="hw_review_subtitle">
+            Review voice clips and maths slate photos uploaded by children from home. 1-click confirmation updates their official FLN level.
+          </p>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" style="background:#0284c7; border:none; font-weight:800;" onclick="seedDemoHomework()">
+            ✨ <span>Load Demo Submissions (Audio + Slate)</span>
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="loadPendingHomework()">
+            🔄 <span data-i18n="refresh">Refresh</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Queue Hero / Filter Bar -->
+      <div class="hw-queue-hero">
+        <div>
+          <div style="font-size:1.1rem; font-weight:800; display:flex; align-items:center; gap:8px;">
+            <span>👩‍🏫</span> <span>Teacher-in-the-Loop Human Oversight</span>
+            <span style="font-size:0.75rem; background:#10b981; color:#fff; padding:2px 8px; border-radius:12px; font-weight:700;">Human Verified</span>
+          </div>
+          <p style="font-size:0.84rem; opacity:0.88; margin-top:4px; max-width:640px;">
+            AI analyzes student audio & slate photos from home. Teachers listen to the audio, check the Hindi text, calibrate levels or marks, and give encouraging feedback.
+          </p>
+        </div>
+        <div style="display:flex; gap:12px;">
+          <div class="hw-hero-stat-badge">
+            <span id="hw-count-total" style="font-size:1.4rem; font-weight:900; color:#38bdf8;">0</span>
+            <span style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.5px;">Pending</span>
+          </div>
+          <div class="hw-hero-stat-badge">
+            <span id="hw-count-reading" style="font-size:1.4rem; font-weight:900; color:#4ade80;">0</span>
+            <span style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.5px;">🎙️ Reading</span>
+          </div>
+          <div class="hw-hero-stat-badge">
+            <span id="hw-count-maths" style="font-size:1.4rem; font-weight:900; color:#c084fc;">0</span>
+            <span style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.5px;">📸 Maths</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hw-filter-bar">
+        <button class="hw-filter-pill active" id="hw-filter-all" onclick="filterHomeworkQueue('all')">
+          <span>📋 All Submissions</span> <span id="pill-count-all" class="badge">0</span>
+        </button>
+        <button class="hw-filter-pill" id="hw-filter-reading" onclick="filterHomeworkQueue('reading')">
+          <span>🎙️ Reading Voice Clips</span> <span id="pill-count-reading" class="badge">0</span>
+        </button>
+        <button class="hw-filter-pill" id="hw-filter-maths" onclick="filterHomeworkQueue('maths')">
+          <span>📸 Maths Slate Photos</span> <span id="pill-count-maths" class="badge">0</span>
+        </button>
+      </div>
+
+      <div id="hw-pending-container">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- 4. MY CLASS VIEW -->
+    <section id="view-my-class" class="view-section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" data-i18n="class_children_title">Class Roster & Children</h2>
+          <p class="section-subtitle" data-i18n="class_children_subtitle">Individual foundational levels, baseline progress, and diagnostic assessment</p>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-secondary" onclick="openStudentLoginModal()">
+            <span>🎒</span> <span>Student Homework Mode</span>
+          </button>
+          <button class="btn btn-primary" onclick="openAddChildModal()">
+            <span>+</span> <span data-i18n="add_child">Add Child</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Interactive ASER Ladder Stepper Bar (Clickable Filter with Counts) -->
+      <div class="ladder-stepper" title="ASER Reading Ladder: 5 progressive levels. Click any step to filter children.">
+        <div class="ladder-step" id="step-beginner" onclick="filterClassList('beginner')">
+          🌱 <span data-i18n="lvl_beginner">Beginner</span> <span id="count-beginner" class="step-count">0</span>
+        </div>
+        <div class="ladder-arrow">➔</div>
+        <div class="ladder-step" id="step-letter" onclick="filterClassList('letter')">
+          🔤 <span data-i18n="lvl_letter">Letter</span> <span id="count-letter" class="step-count">0</span>
+        </div>
+        <div class="ladder-arrow">➔</div>
+        <div class="ladder-step" id="step-word" onclick="filterClassList('word')">
+          📖 <span data-i18n="lvl_word">Word</span> <span id="count-word" class="step-count">0</span>
+        </div>
+        <div class="ladder-arrow">➔</div>
+        <div class="ladder-step" id="step-paragraph" onclick="filterClassList('paragraph')">
+          📑 <span data-i18n="lvl_paragraph">Paragraph</span> <span id="count-paragraph" class="step-count">0</span>
+        </div>
+        <div class="ladder-arrow">➔</div>
+        <div class="ladder-step" id="step-story" onclick="filterClassList('story')">
+          🏆 <span data-i18n="lvl_story">Story</span> <span id="count-story" class="step-count">0</span>
+        </div>
+      </div>
+
+      <!-- Class FLN Mastery Stack Bar -->
+      <div class="fln-distribution-container card" style="padding:14px 18px; margin-bottom:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:0.84rem; font-weight:800; color:var(--secondary);">
+          <span>📊 <span data-i18n="fln_distribution">Class FLN Mastery Distribution</span></span>
+          <span id="fln-assessed-ratio" style="color:var(--text-muted); font-size:0.75rem; font-weight:600;">24/24 Assessed</span>
+        </div>
+        <div class="fln-distribution-bar" id="fln-bar-stack">
+          <!-- Stack segments filled by JS -->
+        </div>
+        <div class="fln-legend" id="fln-legend-items">
+          <!-- Legend chips filled by JS -->
+        </div>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background: #e0f2fe; color: #0284c7;">🧒</div>
+          <div>
+            <div id="kpi-total-children" class="kpi-val">24</div>
+            <div class="kpi-label" data-i18n="kpi_total">Enrolled Children</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background: #dcfce7; color: #16a34a;">✓</div>
+          <div>
+            <div id="kpi-assessed-children" class="kpi-val">24</div>
+            <div class="kpi-label" data-i18n="kpi_assessed">Assessed Children</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background: #fef3c7; color: #d97706;">📈</div>
+          <div>
+            <div id="kpi-moved-up" class="kpi-val">11</div>
+            <div class="kpi-label" data-i18n="kpi_moved_up">Moved Up a Level</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search, Filter & Sort Toolbar -->
+      <div class="class-toolbar">
+        <div class="class-toolbar-top">
+          <div class="search-box-wrapper">
+            <span class="search-icon-inside">🔍</span>
+            <input type="text" id="student-search-input" class="form-control" placeholder="Search child by name or roll..." oninput="onStudentSearch(this.value)">
+            <button id="search-clear-btn" class="search-clear-btn" style="display:none;" onclick="clearStudentSearch()">✕</button>
+          </div>
+          <div class="sort-selector">
+            <select id="student-sort-select" class="form-control" style="font-size:0.85rem; padding:8px 12px; font-weight:600;" onchange="onStudentSort(this.value)">
+              <option value="name_asc">Sort: Name (A-Z)</option>
+              <option value="name_desc">Sort: Name (Z-A)</option>
+              <option value="level_desc">Sort: Level (Highest First)</option>
+              <option value="level_asc">Sort: Level (Lowest First)</option>
+              <option value="tests_desc">Sort: Most Assessed</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="filter-pills-scroll">
+          <button class="evaluator-btn active" id="pill-filter-all" onclick="filterClassList('all', this)" data-i18n="filter_all">All (24)</button>
+          <button class="evaluator-btn" id="pill-filter-story" onclick="filterClassList('story', this)">🏆 Story</button>
+          <button class="evaluator-btn" id="pill-filter-paragraph" onclick="filterClassList('paragraph', this)">📑 Paragraph</button>
+          <button class="evaluator-btn" id="pill-filter-word" onclick="filterClassList('word', this)">📖 Word</button>
+          <button class="evaluator-btn" id="pill-filter-letter" onclick="filterClassList('letter', this)">🔤 Letter</button>
+          <button class="evaluator-btn" id="pill-filter-beginner" onclick="filterClassList('beginner', this)">🌱 Beginner</button>
+          <button class="evaluator-btn" id="pill-filter-moved" style="background:#fef3c7; color:#b45309; border:1px solid #fde68a;" onclick="filterClassList('moved_up', this)">🚀 Moved Up (11)</button>
+        </div>
+      </div>
+
+      <!-- Student Cards Grid -->
+      <div id="students-container" class="students-grid">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- 5. READING ASSESSMENT VIEW -->
+    <section id="view-reading" class="view-section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" data-i18n="reading_title">Reading Assessment</h2>
+          <p class="section-subtitle" data-i18n="reading_subtitle">Ask the child to read the passage aloud. The app shows which words were read correctly.</p>
+        </div>
+        <div id="ladder-hint-box" style="background:#fef3c7; border:1px solid #fde68a; padding:6px 14px; border-radius:var(--radius-sm); font-size:0.85rem; font-weight:700; color:#92400e;">
+          💡 Start with the Paragraph passage (P1)
+        </div>
+      </div>
+
+      <div class="assessment-layout">
+        <!-- Left Column: Child Selection & Passage Display -->
+        <div>
+          <div class="card">
+            <div class="form-group">
+              <label class="form-label" for="assess-child-select" data-i18n="select_child">Select Child</label>
+              <select id="assess-child-select" class="form-control" onchange="onChildSelectChange()">
+                <!-- Populated via JS -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="assess-task-select" data-i18n="select_task">Assessment Task / Level</label>
+              <select id="assess-task-select" class="form-control" onchange="onTaskSelectChange()">
+                <option value="paragraph">Paragraph (P1 - अनुच्छेद)</option>
+                <option value="story">Story (S1 - कहानी)</option>
+                <option value="word">Word List (W1 - शब्द)</option>
+                <option value="letter">Letter Grid (L1 - अक्षर)</option>
+              </select>
+            </div>
+
+            <!-- Passage Text Card -->
+            <div class="passage-display">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span id="passage-level-tag" class="lvl-badge lvl-paragraph">Paragraph Level</span>
+                <span id="passage-id-tag" style="font-size:0.78rem; font-weight:700; color:var(--text-muted);">P1</span>
+              </div>
+              <div id="passage-text-display" class="passage-text">
+                राम बाज़ार जाता है। वह आम खरीदता है। आम मीठा है। राम घर आता है।
+              </div>
+              <div class="passage-meta">
+                <span>⏱️ <span data-i18n="est_time">Est. Time</span>: <strong id="passage-time">20</strong>s</span>
+                <span>🎯 <span data-i18n="phonics_focus">Phonics Focus</span>: Simple conjuncts & matras</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Offline Queue Indicator in Assessment View -->
+          <div class="card" style="background:#f8fafc; border-style:dashed;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <div>
+                <strong data-i18n="offline_queue">Offline Queue:</strong>
+                <span id="queue-count-text">0 recordings queued</span>
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="flushOfflineQueue()" data-i18n="sync_now">Sync Now</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Tactile Recorder & Assessment Results -->
+        <div>
+          <!-- Recorder Box -->
+          <div class="recorder-box">
+            <div class="mic-btn-container">
+              <button id="mic-main-btn" class="mic-btn" onclick="toggleRecording()" title="Start / Stop Recording">
+                🎙️
+              </button>
+            </div>
+            <div id="record-timer" class="rec-timer">00:00</div>
+            <div id="record-status-msg" class="rec-helper" data-i18n="mic_instruction">Press the big button and ask the child to read aloud (max 30s)</div>
+
+            <audio id="audio-playback" controls style="display:none;"></audio>
+
+            <div class="recorder-controls">
+              <button id="btn-stop-rec" class="btn btn-secondary btn-sm" onclick="stopRecording()" style="display:none;" data-i18n="stop_rec">
+                ⏹️ Stop Recording
+              </button>
+              <button id="btn-redo-rec" class="btn btn-secondary btn-sm" onclick="resetRecorder()" style="display:none;" data-i18n="redo_rec">
+                🔄 Record Again
+              </button>
+              <button id="btn-submit-audio" class="btn btn-primary" onclick="submitAssessmentAudio()" style="display:none;" data-i18n="analyze_audio">
+                ⚡ Assess Audio
+              </button>
+            </div>
+
+            <!-- Alternative: File upload for testing clip.mp4 -->
+            <div style="margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--border); font-size: 0.8rem; color: var(--text-muted);">
+              <span data-i18n="or_upload_audio">Or select an audio/video file for testing:</span>
+              <input type="file" id="audio-file-input" accept="audio/*,video/*" style="display:block; margin:8px auto; max-width:260px;" onchange="handleAudioFileUpload(event)">
+            </div>
+          </div>
+
+          <!-- Result Panel (Shown after AI analysis) -->
+          <div id="assessment-result-panel" class="card" style="display:none; margin-top:20px; border-top: 4px solid var(--primary);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <h3 style="font-size:1.15rem; font-weight:800; color:var(--secondary);" data-i18n="result_title">Assessment Result</h3>
+              <div id="res-confidence-badge" class="status-pill status-online" data-i18n="high_conf">High Confidence</div>
+            </div>
+
+            <!-- Scores -->
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:14px;">
+              <div style="background:#f8fafc; padding:10px 14px; border-radius:var(--radius-sm); border:1px solid #e2e8f0;">
+                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700;" data-i18n="accuracy_score">Accuracy Score</div>
+                <div id="res-score-val" style="font-size:1.6rem; font-weight:800; color:var(--primary);">92%</div>
+                <div id="res-score-detail" style="font-size:0.72rem; color:var(--text-muted); font-weight:600; margin-top:2px;"></div>
+              </div>
+              <div style="background:#f8fafc; padding:10px 14px; border-radius:var(--radius-sm); border:1px solid #e2e8f0;">
+                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700;" data-i18n="ai_suggested_level">Suggested Level</div>
+                <div id="res-ai-level" style="font-size:1.4rem; font-weight:800; color:var(--secondary);">Paragraph</div>
+              </div>
+            </div>
+
+            <!-- Teacher Audio Playback Studio (Live In-Class Hearing) -->
+            <div id="res-audio-container" class="hw-audio-box" style="display:none; margin-bottom:14px;">
+              <div class="hw-audio-controls">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:1.2rem;">🎧</span>
+                  <div>
+                    <strong style="color:#15803d; font-size:0.88rem;" data-i18n="listen_recorded_audio">Listen to Student Reading Audio</strong>
+                    <div style="font-size:0.74rem; color:#166534;" data-i18n="teacher_playback_hint">Direct playback for teacher verification before confirming level</div>
+                  </div>
+                </div>
+                <div style="display:flex; gap:6px;">
+                  <button type="button" class="btn btn-sm btn-outline" style="font-size:0.74rem; padding:3px 8px; background:#fff;" onclick="setPlaybackSpeed('res-audio-player', 0.8)">0.8x Slow</button>
+                  <button type="button" class="btn btn-sm btn-outline" style="font-size:0.74rem; padding:3px 8px; background:#fff;" onclick="setPlaybackSpeed('res-audio-player', 1.0)">1.0x Normal</button>
+                </div>
+              </div>
+              <audio id="res-audio-player" controls preload="metadata" style="margin-top:6px; width:100%;">
+                Your browser does not support audio playback.
+              </audio>
+            </div>
+
+            <!-- Word-by-word visual alignment evidence -->
+            <div class="evidence-box">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:0.85rem;" data-i18n="evidence_title">Word-by-word Alignment Evidence:</strong>
+                <span style="font-size:0.72rem; color:var(--text-muted);">🟢 Exact 🟡 Close 🔴 Skipped 🟣 Extra</span>
+              </div>
+              <div id="evidence-words-list" class="evidence-words">
+                <!-- Word pills rendered by JS -->
+              </div>
+            </div>
+
+            <!-- Claude AI Error Pattern Card -->
+            <div id="claude-pattern-box" class="claude-card">
+              <div class="claude-card-title">
+                <span>🤖</span> <span data-i18n="claude_diag">Mistake pattern (AI summary)</span>
+              </div>
+              <p id="claude-pattern-text" style="font-size:0.9rem; color:#475569; line-height:1.6;">
+                Child reads most words correctly, pausing on long vowels.
+              </p>
+              <div id="claude-next-skill" style="margin-top:8px; font-size:0.82rem; font-weight:700; color:var(--primary-dark);">
+                🎯 Next Skill: Silent reading with vowel markers
+              </div>
+            </div>
+
+            <!-- Teacher Confirm / Override Decision Box -->
+            <div class="confirm-box">
+              <h4 style="font-size:0.95rem; font-weight:800; color:var(--secondary); margin-bottom:8px;" data-i18n="teacher_decision">Teacher Decision (Teacher-in-the-Loop):</h4>
+              <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:12px;" data-i18n="teacher_decision_desc">AI proposes a hint; the teacher always makes the final call.</p>
+              
+              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button id="btn-confirm-ai-level" class="btn btn-success" onclick="confirmAILevel()">
+                  ✓ <span data-i18n="confirm_level_btn">Confirm Level</span>
+                </button>
+                
+                <div style="display:flex; gap:6px; align-items:center;">
+                  <span style="font-size:0.82rem; font-weight:700;" data-i18n="or_override">Or set:</span>
+                  <select id="teacher-override-select" class="form-control" style="width:auto; padding:6px 10px;">
+                    <option value="beginner">Beginner (शुरुआती)</option>
+                    <option value="letter">Letter (अक्षर)</option>
+                    <option value="word">Word (शब्द)</option>
+                    <option value="paragraph">Paragraph (अनुच्छेद)</option>
+                    <option value="story">Story (कहानी)</option>
+                  </select>
+                  <button class="btn btn-secondary btn-sm" onclick="confirmOverrideLevel()" data-i18n="override_btn">Change</button>
+                </div>
+              </div>
+
+              <!-- Privacy note -->
+              <div class="privacy-notice">
+                <span>🔒</span>
+                <span data-i18n="dpdp_guarantee"><strong>Privacy:</strong> Audio deleted immediately after scoring. Zero audio files stored on server.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. MANUAL LEVEL MODE (100% OFFLINE) -->
+    <section id="view-manual" class="view-section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" data-i18n="manual_title">Offline Manual Level (No AI Required)</h2>
+          <p class="section-subtitle" data-i18n="manual_subtitle">In noisy classrooms or when completely offline, teachers can record a child's level with 1 tap</p>
+        </div>
+      </div>
+
+      <div class="card" style="max-width: 650px; margin: 0 auto; padding: 26px;">
+        <div class="form-group">
+          <label class="form-label" for="manual-child-select" data-i18n="select_child">Select Child</label>
+          <select id="manual-child-select" class="form-control" style="font-size:1.1rem; padding:12px;">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+
+        <div style="margin: 24px 0;">
+          <label class="form-label" data-i18n="select_fln_level">Select FLN Level:</label>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-top: 10px;">
+            <button type="button" class="btn btn-outline" style="border:2px solid #cbd5e1; flex-direction:column; padding:16px 8px;" onclick="saveManualLevel('beginner')">
+              <span style="font-size:1.6rem;">🌱</span>
+              <span style="font-size:0.9rem; font-weight:800; margin-top:4px;" data-i18n="lvl_beginner">Beginner</span>
+              <span style="font-size:0.7rem; color:var(--text-muted);">शुरुआती</span>
+            </button>
+            <button type="button" class="btn btn-outline" style="border:2px solid #fde68a; flex-direction:column; padding:16px 8px;" onclick="saveManualLevel('letter')">
+              <span style="font-size:1.6rem;">🔤</span>
+              <span style="font-size:0.9rem; font-weight:800; margin-top:4px;" data-i18n="lvl_letter">Letter</span>
+              <span style="font-size:0.7rem; color:var(--text-muted);">अक्षर</span>
+            </button>
+            <button type="button" class="btn btn-outline" style="border:2px solid #bfdbfe; flex-direction:column; padding:16px 8px;" onclick="saveManualLevel('word')">
+              <span style="font-size:1.6rem;">📖</span>
+              <span style="font-size:0.9rem; font-weight:800; margin-top:4px;" data-i18n="lvl_word">Word</span>
+              <span style="font-size:0.7rem; color:var(--text-muted);">शब्द</span>
+            </button>
+            <button type="button" class="btn btn-outline" style="border:2px solid #ddd6fe; flex-direction:column; padding:16px 8px;" onclick="saveManualLevel('paragraph')">
+              <span style="font-size:1.6rem;">📑</span>
+              <span style="font-size:0.9rem; font-weight:800; margin-top:4px;" data-i18n="lvl_paragraph">Paragraph</span>
+              <span style="font-size:0.7rem; color:var(--text-muted);">अनुच्छेद</span>
+            </button>
+            <button type="button" class="btn btn-outline" style="border:2px solid #a7f3d0; flex-direction:column; padding:16px 8px;" onclick="saveManualLevel('story')">
+              <span style="font-size:1.6rem;">🏆</span>
+              <span style="font-size:0.9rem; font-weight:800; margin-top:4px;" data-i18n="lvl_story">Story</span>
+              <span style="font-size:0.7rem; color:var(--text-muted);">कहानी</span>
+            </button>
+          </div>
+        </div>
+
+        <div style="background:#f8fafc; border-radius:var(--radius-sm); padding:12px; font-size:0.82rem; color:var(--text-muted);">
+          💡 <span data-i18n="manual_hint">Saves instantly to the child's profile. If offline, is saved safely on the phone and uploads automatically when internet returns.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. MATHS SLATE VIEW -->
+    <section id="view-maths" class="view-section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" data-i18n="maths_title">Maths Slate Assessment</h2>
+          <p class="section-subtitle" data-i18n="maths_subtitle">Child's slate photo -> Claude Vision reads digits -> Deterministic Python code evaluates arithmetic (LLM does not do math)</p>
+        </div>
+      </div>
+
+      <div class="assessment-layout">
+        <div>
+          <div class="card">
+            <div class="form-group">
+              <label class="form-label" for="maths-child-select" data-i18n="select_child">Select Child</label>
+              <select id="maths-child-select" class="form-control">
+                <!-- Populated via JS -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="maths-problems-input" data-i18n="problems_list">Problems List (JSON Format)</label>
+              <input type="text" id="maths-problems-input" class="form-control" value='["52-27", "34+18", "6+3"]'>
+              <small style="color:var(--text-muted); font-size:0.75rem;">Example: ["52-27", "34+18", "6+3"]</small>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="maths-photo-input" data-i18n="slate_photo_label">Slate / Notebook Photo</label>
+              <input type="file" id="maths-photo-input" class="form-control" accept="image/*" onchange="previewSlateImage(event)">
+            </div>
+
+            <div id="slate-preview-container" style="display:none; text-align:center; margin:14px 0;">
+              <img id="slate-preview-img" style="max-height:220px; border-radius:var(--radius-sm); border:2px solid var(--border);" alt="Preview">
+            </div>
+
+            <button class="btn btn-primary btn-lg" style="width:100%; margin-top:10px;" onclick="submitMathsSlate()">
+              📐 <span data-i18n="analyze_slate_btn">Analyze Slate & Diagnose Errors</span>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div id="maths-results-card" class="card" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <h3 style="font-size:1.15rem; font-weight:800; color:var(--secondary);" data-i18n="maths_results">Maths Marking Results</h3>
+              <span id="maths-score-pill" class="status-pill status-online">2/3 Correct (66.7%)</span>
+            </div>
+
+            <!-- Slate Inspection Image Card (Teacher Verification) -->
+            <div id="maths-result-slate-box" class="hw-slate-img-card" style="margin-bottom:14px; text-align:center;">
+              <img id="maths-result-slate-img" src="" alt="Analyzed Slate" style="max-height:190px; width:auto; border-radius:var(--radius-sm); border:1px solid #e2e8f0; cursor:pointer;" onclick="openImageZoomModal(this.src)">
+              <div style="font-size:0.75rem; color:#94a3b8; margin-top:6px; cursor:pointer;" onclick="openImageZoomModal(document.getElementById('maths-result-slate-img').src)">
+                🔍 <span data-i18n="click_zoom_slate">Click photo to zoom and inspect child's handwritten numbers</span>
+              </div>
+            </div>
+
+            <div id="maths-problems-breakdown" style="display:flex; flex-direction:column; gap:12px;">
+              <!-- Rendered by JS -->
+            </div>
+
+            <div class="privacy-notice" style="margin-top:16px;">
+              <span>🔒</span>
+              <span data-i18n="dpdp_photo_notice"><strong>Privacy:</strong> Photo deleted immediately after OCR. Zero image storage on server.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. GROUPS VIEW -->
+    <section id="view-groups" class="view-section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" data-i18n="groups_title">Adaptive Learning Groups</h2>
+          <p class="section-subtitle" data-i18n="groups_subtitle">Automated grouping of 3-4 clusters based on reading level and common error patterns</p>
+        </div>
+        <button class="btn btn-secondary" onclick="loadGroups()">🔄 <span data-i18n="refresh_groups">Refresh Groups</span></button>
+      </div>
+
+      <div id="groups-container" class="groups-grid">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- 9. DAILY 20-MIN PLAN VIEW -->
+    <section id="view-plan" class="view-section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" data-i18n="plan_title">Daily 20-Minute Multi-Grade Timetable</h2>
+          <p class="section-subtitle" data-i18n="plan_subtitle">Engineered for multi-grade classrooms: 1 group with teacher while other groups work on peer activities</p>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ <span data-i18n="print_plan">Print / PDF</span></button>
+          <button class="btn btn-outline btn-sm" onclick="loadDailyPlan()">🔄 <span data-i18n="refresh_plan">Refresh Plan</span></button>
+        </div>
+      </div>
+
+      <div class="card" style="background:#fff7ed; border-color:#fed7aa; margin-bottom:20px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:1.5rem;">⏱️</span>
+          <div>
+            <strong data-i18n="time_rule_title">Time Allocation Schedule:</strong>
+            <span style="font-size:0.85rem; color:#9a3412;" data-i18n="time_rule_desc">
+              0-2 min Whole class warmup | 2-10 min Group A with Teacher | 10-17 min Group B with Teacher | 17-20 min Wrap-up & checking
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div id="plan-timeline-container" class="plan-timeline">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- 10. PROGRESS VIEW -->
+    <section id="view-progress" class="view-section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" data-i18n="progress_title">FLN Progress Tracker</h2>
+          <p class="section-subtitle" data-i18n="progress_subtitle">Comparison between initial baseline level and current mastery level</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+            <thead>
+              <tr style="border-bottom:2px solid var(--border); text-align:left;">
+                <th style="padding:12px;" data-i18n="student_label">Student Name / Roll</th>
+                <th style="padding:12px;" data-i18n="baseline_level">Baseline Level</th>
+                <th style="padding:12px;" data-i18n="current_level">Current Level</th>
+                <th style="padding:12px;" data-i18n="progress_status">Learning Progress</th>
+              </tr>
+            </thead>
+            <tbody id="progress-table-body">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11. EVALUATOR TRY-A-SAMPLE VIEW (Winning Feature!) -->
+    <section id="view-samples" class="view-section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">⭐ Evaluator Demo & Test Samples (S1 - S5)</h2>
+          <p class="section-subtitle" data-i18n="samples_subtitle">One-tap sample clips so you can see how a result looks. No microphone needed.</p>
+        </div>
+      </div>
+
+      <div class="card" style="background:#eff6ff; border-color:#bfdbfe; margin-bottom:20px;">
+        <p style="font-size:0.88rem; color:#1e40af; line-height:1.6;">
+          <strong>💡 How to use this page:</strong> Tap a sample to see the result. Every result is a suggestion: the teacher confirms or changes the level. Audio and photos are not stored on our server after analysis. Recording and manual level work without internet; AI analysis needs internet and waits in a queue.</p>
+      </div>
+
+      <div id="samples-container" class="samples-grid">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Sample Output Display Area -->
+      <div id="sample-output-card" class="card" style="display:none; margin-top:24px; border:2px solid var(--primary);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h3 id="sample-output-title" style="font-size:1.15rem; font-weight:800; color:var(--primary-dark);">Sample Execution Result</h3>
+          <span id="sample-mode-badge" class="status-pill status-online">Cached (0ms, 0 tokens)</span>
+        </div>
+        <div id="sample-output-content"></div>
+      </div>
+    </section>
+
+    <!-- 12. SUMMARY DASHBOARD (Headteacher / Officer) -->
+    <section id="view-summary" class="view-section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" data-i18n="summary_title">Institutional Summary Dashboard</h2>
+          <p class="section-subtitle" data-i18n="summary_subtitle">Aggregate view for Headteachers and Block Officers (Privacy: counts below 5 are hidden)</p>
+        </div>
+      </div>
+
+      <div id="summary-cards-container">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Add Child Modal -->
+  <div id="add-child-modal" class="modal-overlay">
+    <div class="modal-card">
+      <h3 style="font-size:1.25rem; font-weight:800; color:var(--secondary); margin-bottom:10px;" data-i18n="add_child_modal_title">Add New Child</h3>
+      <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:16px;" data-i18n="add_child_modal_hint">
+        🔒 <strong>Privacy Rule:</strong> First name or roll number only (e.g. 'R25' or 'Priya'). Surnames or government ID numbers are prohibited.
+      </p>
+      <form onsubmit="handleAddChildSubmit(event)">
+        <div class="form-group">
+          <label class="form-label" for="new-child-label" data-i18n="child_name_roll">First Name or Roll Number</label>
+          <input type="text" id="new-child-label" class="form-control" placeholder="e.g. R25 or Priya" required>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
+          <button type="button" class="btn btn-outline" onclick="closeAddChildModal()" data-i18n="cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" data-i18n="save">Save Child</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Student Quick Login Modal -->
+  <div id="student-login-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="font-size:1.25rem; font-weight:800; color:var(--secondary);">🎒 Student Homework Login</h3>
+        <button type="button" class="btn btn-sm btn-outline" onclick="closeStudentLoginModal()">✕</button>
+      </div>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;">
+        Click a demo student or type any child name / roll number:
+      </p>
+
+      <!-- Quick 1-tap demo chips -->
+      <div style="margin-bottom:18px; background:#f8fafc; padding:12px; border-radius:var(--radius-sm); border:1px solid #e2e8f0;">
+        <span style="font-size:0.78rem; font-weight:800; color:var(--secondary);">1-Tap Demo Students:</span>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
+          <button type="button" class="btn btn-sm btn-primary" style="padding:4px 10px;" onclick="quickStudentLogin('R01'); closeStudentLoginModal();">🧒 R01</button>
+          <button type="button" class="btn btn-sm btn-secondary" style="padding:4px 10px;" onclick="quickStudentLogin('R02'); closeStudentLoginModal();">🧒 R02</button>
+          <button type="button" class="btn btn-sm btn-secondary" style="padding:4px 10px;" onclick="quickStudentLogin('R03'); closeStudentLoginModal();">🧒 R03</button>
+          <button type="button" class="btn btn-sm btn-secondary" style="padding:4px 10px;" onclick="quickStudentLogin('Aman'); closeStudentLoginModal();">🧒 Aman (New)</button>
+          <button type="button" class="btn btn-sm btn-secondary" style="padding:4px 10px;" onclick="quickStudentLogin('Priya'); closeStudentLoginModal();">🧒 Priya (New)</button>
+        </div>
+      </div>
+
+      <form onsubmit="handleModalStudentLoginSubmit(event)">
+        <div class="form-group">
+          <label class="form-label" for="modal-student-label">Or Type Any Name / Roll Number:</label>
+          <input type="text" id="modal-student-label" class="form-control" placeholder="e.g. R05, Aman, or Pooja" required>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+          <button type="button" class="btn btn-outline" onclick="closeStudentLoginModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="background:#0284c7;">🎒 Open Homework Portal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Judge Innovation Cheat-Sheet Modal -->
+  <div id="judge-cheatsheet-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width:640px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:1.6rem;">🏆</span>
+          <div>
+            <h3 style="font-size:1.25rem; font-weight:800; color:var(--secondary);">Hackathon Judge & Architecture Cheat-Sheet</h3>
+            <span style="font-size:0.75rem; background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:10px; font-weight:700;">Class Map FLN Engine</span>
+          </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline" onclick="closeJudgeCheatSheetModal()">✕</button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:12px; font-size:0.86rem; color:var(--text-main);">
+        <div style="background:#f8fafc; border-left:4px solid #0284c7; padding:12px; border-radius:4px;">
+          <strong style="color:#0369a1;">1. 🎯 NIPUN Bharat & ASER Standard Alignment</strong>
+          <p style="margin-top:4px; color:#475569;">
+            Implements the exact 5-tier ASER ladder (Beginner ➔ Letter ➔ Word ➔ Paragraph ➔ Story) with 30-second rapid stopping rules so struggling students are not frustrated.
+          </p>
+        </div>
+
+        <div style="background:#f8fafc; border-left:4px solid #10b981; padding:12px; border-radius:4px;">
+          <strong style="color:#047857;">2. 👩‍🏫 Teacher-in-the-Loop Human Oversight</strong>
+          <p style="margin-top:4px; color:#475569;">
+            AI never acts as an unchecked gatekeeper. In homework review, the teacher can listen to student audio clips, inspect slate handwriting, manually adjust grades/levels, and provide personal guidance.
+          </p>
+        </div>
+
+        <div style="background:#f8fafc; border-left:4px solid #7c3aed; padding:12px; border-radius:4px;">
+          <strong style="color:#6d28d9;">3. 🧠 Multimodal AI (SARVAM Indic STT + Claude Vision)</strong>
+          <p style="margin-top:4px; color:#475569;">
+            Devanagari text-to-speech alignment handles dialect variants (e.g., vo ➔ vah). Vision OCR reads chalk slates and classifies arithmetic error patterns (e.g., smaller-from-larger subtraction bug).
+          </p>
+        </div>
+
+        <div style="background:#f8fafc; border-left:4px solid #f59e0b; padding:12px; border-radius:4px;">
+          <strong style="color:#b45309;">4. 🔒 Privacy by Design (DPDP Act Compliant)</strong>
+          <p style="margin-top:4px; color:#475569;">
+            First-name/roll-number only (no Aadhaar, phone numbers, or government IDs stored). Audio clips are compressed under 2MB and run securely on local school edge instances.
+          </p>
+        </div>
+
+        <div style="background:#f8fafc; border-left:4px solid #059669; padding:12px; border-radius:4px;">
+          <strong style="color:#065f46;">5. 📶 Offline-First & Resilient Local Caching</strong>
+          <p style="margin-top:4px; color:#475569;">
+            Built-in ServiceWorker/Fetch cache with simulated offline testing button. Works seamlessly even when village schools lose internet connectivity.
+          </p>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+        <button type="button" class="btn btn-primary" onclick="closeJudgeCheatSheetModal()">Got it, continue testing!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Zoom Modal -->
+  <div id="image-zoom-modal" class="modal-overlay" onclick="closeImageZoomModal()">
+    <div style="max-width:90vw; max-height:90vh; position:relative;" onclick="event.stopPropagation()">
+      <button style="position:absolute; top:-36px; right:0; background:#fff; border:none; border-radius:50%; width:32px; height:32px; font-weight:bold; cursor:pointer;" onclick="closeImageZoomModal()">✕</button>
+      <img id="zoom-modal-img" src="" style="max-width:90vw; max-height:85vh; border-radius:8px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);" alt="Zoomed view">
+    </div>
+  </div>
+
+  <script src="/ux-patch.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

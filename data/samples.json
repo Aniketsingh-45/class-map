@@ -1,0 +1,52 @@
+[
+  {
+    "id": "S1",
+    "type": "reading",
+    "label": "sample (adult reader)",
+    "title": "Saaf recording. Word level. Teacher confirm",
+    "passage_id": "W1",
+    "audio_sec": 14,
+    "note": "Sample (adult reader). Clear reading, word level. Teacher confirms AI level.",
+    "transcript": "घर जल कमल आम पल बस नल फल सब कल"
+  },
+  {
+    "id": "S2",
+    "type": "reading",
+    "label": "sample (adult reader)",
+    "title": "Paragraph level, 2 galtiyan, error pattern ka summary",
+    "passage_id": "P1",
+    "audio_sec": 19,
+    "note": "Sample (adult reader). One word skipped, one word substituted. Claude summarizes error pattern.",
+    "transcript": "राम बजार जाता है वह खरीदता है आम मीठा है राम घर आता है"
+  },
+  {
+    "id": "S3",
+    "type": "reading",
+    "label": "sample (staged noise)",
+    "title": "Shor wali recording. Low confidence. App teacher se poochti hai",
+    "passage_id": "P1",
+    "audio_sec": 2,
+    "note": "Staged noise. Low confidence triggers guardrail: app asks teacher to decide.",
+    "transcript": "हाँ आम"
+  },
+  {
+    "id": "S4",
+    "type": "maths_slate",
+    "label": "staged slate",
+    "title": "Slate photo. Borrowing error pakadta hai",
+    "note": "Staged slate. 52-27 -> 35. Code rule detects column-wise smaller-from-larger borrowing bug.",
+    "items": [
+      {"problem": "52-27", "child_answer": "35", "legibility": "clear"}
+    ]
+  },
+  {
+    "id": "S5",
+    "type": "maths_slate",
+    "label": "staged slate",
+    "title": "Unreadable photo. null. Manual entry",
+    "note": "Staged slate. Unreadable handwriting returns null and prompts manual entry.",
+    "items": [
+      {"problem": "64-28", "child_answer": null, "legibility": "unreadable"}
+    ]
+  }
+]
